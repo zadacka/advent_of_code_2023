@@ -17,6 +17,7 @@ def test_parse_line():
     assert 15 == parse_line("a1b2c3d4e5f")
     assert 77 == parse_line("treb7uchet")
 
+
 words_to_numbers = {
     "one": 1,
     "two": 2,
@@ -27,9 +28,30 @@ words_to_numbers = {
     "seven": 7,
     "eight": 8,
     "nine": 9,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4,
+    "5": 5,
+    "6": 6,
+    "7": 7,
+    "8": 8,
+    "9": 9,
 }
 
+
 def parse_wordy_line(line: str) -> int:
+    filtered = []
+    for index in range(len(line)):
+        for word, number in words_to_numbers.items():
+            if line[index:].startswith(word):
+                filtered.append(number)
+                break
+        index += 1
+    return filtered[0] * 10 + filtered[-1]
+
+
+def parse_wordy_line2(line: str) -> int:
     filtered = []
     for index, char in enumerate(line):
         if char.isnumeric():
@@ -38,7 +60,7 @@ def parse_wordy_line(line: str) -> int:
             for word in words_to_numbers.keys():
                 if line[index:].startswith(word):
                     filtered.append(words_to_numbers[word])
-    return filtered[0] * 10 + filtered[-1]
+    return filtered
 
 
 def test_parse_line_with_words():
@@ -49,9 +71,15 @@ def test_parse_line_with_words():
     assert 42 == parse_wordy_line("4nineeightseven2")
     assert 14 == parse_wordy_line("zoneight234")
     assert 76 == parse_wordy_line("7pqrstsixteen")
+    assert 31 == parse_wordy_line("'35zrgthreetwonesz")
+
 
 def test_calculate_calibration():
     assert 142 == calculate_calibration('day01_test_input.txt')
+
+
+def test_calculate_wordy_calibration():
+    assert 281 == calculate_wordy_calibration('day01_more_test_input.txt')
 
 
 def calculate_calibration(filename: str) -> int:
@@ -61,6 +89,7 @@ def calculate_calibration(filename: str) -> int:
             total += parse_line(line)
     return total
 
+
 def calculate_wordy_calibration(filename: str) -> int:
     total = 0
     with open(filename) as f:
@@ -68,6 +97,7 @@ def calculate_wordy_calibration(filename: str) -> int:
             total += parse_wordy_line(line)
     return total
 
+
 def test_day_01():
-    assert 54632 == calculate_calibration('day01_real_input.txt')
-    assert 54632 == calculate_wordy_calibration('day01_real_input.txt')
+    assert calculate_calibration('day01_real_input.txt') == 54632
+    assert calculate_wordy_calibration('day01_real_input.txt') == 54019
