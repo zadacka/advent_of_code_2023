@@ -29,7 +29,7 @@ def get_number_map(schematic: list) -> dict:
                     number_starting_position = (row, column)
                 current_number += character
 
-            if not character.isnumeric() or column == len(line)-1:
+            if not character.isnumeric() or column == len(line) - 1:
                 if current_number:
                     numbers[number_starting_position] = int(current_number)
                     number_starting_position = None
@@ -40,10 +40,11 @@ def get_number_map(schematic: list) -> dict:
 def get_surrounding_locations(loc, number):
     start_row, start_column = loc
     number_length = len(str(number))
-    locations_above = [(start_row -1, col) for col in range(start_column -1, start_column + number_length + 1)]
-    locations_around = [(start_row, start_column -1), (start_row, start_column + number_length)]
-    locations_below = [(start_row +1, col) for col in range(start_column -1, start_column + number_length + 1)]
+    locations_above = [(start_row - 1, col) for col in range(start_column - 1, start_column + number_length + 1)]
+    locations_around = [(start_row, start_column - 1), (start_row, start_column + number_length)]
+    locations_below = [(start_row + 1, col) for col in range(start_column - 1, start_column + number_length + 1)]
     return locations_above + locations_around + locations_below
+
 
 def get_parts(number_map, symbol_map):
     parts = dict()
@@ -62,7 +63,8 @@ def get_gears(number_map, symbol_map):
         for surrounding_loc in get_surrounding_locations(number_loc, number):
             if surrounding_loc in gear_count_map:
                 gear_count_map[surrounding_loc].append(number)
-    return [part_numbers[0] * part_numbers[1] for gear_loc, part_numbers in gear_count_map.items() if len(part_numbers) == 2]
+    return [part_numbers[0] * part_numbers[1] for gear_loc, part_numbers in gear_count_map.items() if
+            len(part_numbers) == 2]
 
 
 def test_part1_test_input():
@@ -81,6 +83,7 @@ def test_part1_test_input():
     assert gears == [16345, 451490]
     assert sum(gears) == 467835
 
+
 def test_real_input():
     schematic = get_schematic('day03_real_input.txt')
     symbol_map = get_symbol_map(schematic)
@@ -90,5 +93,3 @@ def test_real_input():
 
     gears = get_gears(number_map, symbol_map)
     assert sum(gears) == 79613331
-
-
