@@ -29,7 +29,7 @@ def get_number_map(schematic: list) -> dict:
                     number_starting_position = (row, column)
                 current_number += character
 
-            if not character.isnumeric() or column == len(line):
+            if not character.isnumeric() or column == len(line)-1:
                 if current_number:
                     numbers[number_starting_position] = int(current_number)
                     number_starting_position = None
@@ -72,7 +72,7 @@ def test_part1_real_input():
     symbol_map = get_symbol_map(schematic)
     number_map = get_number_map(schematic)
     parts = get_parts(number_map, symbol_map)
-    assert sum([value for value in parts.values()]) == 4361
+    assert sum([value for value in parts.values()]) == 543867
 
 
 
@@ -107,4 +107,3 @@ if __name__ == '__main__':
             else:
                 this_row += character
         print(''.join(this_row))
-
