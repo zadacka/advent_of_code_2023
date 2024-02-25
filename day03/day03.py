@@ -54,6 +54,17 @@ def get_parts(number_map, symbol_map):
     return parts
 
 
+def get_gears(number_map, symbol_map):
+    asterisk_map = {loc: symbol for loc, symbol in symbol_map.items() if symbol == "*"}
+    gear_count_map = {loc: [] for loc in asterisk_map.keys()}
+
+    for number_loc, number in number_map.items():
+        for surrounding_loc in get_surrounding_locations(number_loc, number):
+            if surrounding_loc in gear_count_map:
+                gear_count_map[surrounding_loc].append(number)
+    return [part_numbers[0] * part_numbers[1] for gear_loc, part_numbers in gear_count_map.items() if len(part_numbers) == 2]
+
+
 def test_part1_test_input():
     schematic = get_schematic('day03_test_input.txt')
     symbol_map = get_symbol_map(schematic)
@@ -66,6 +77,9 @@ def test_part1_test_input():
     parts = get_parts(number_map, symbol_map)
     assert sum([value for value in parts.values()]) == 4361
 
+    gears = get_gears(number_map, symbol_map)
+    assert gears == [16345, 451490]
+    assert sum(gears) == 467835
 
 def test_part1_real_input():
     schematic = get_schematic('day03_real_input.txt')
@@ -74,36 +88,7 @@ def test_part1_real_input():
     parts = get_parts(number_map, symbol_map)
     assert sum([value for value in parts.values()]) == 543867
 
+    gears = get_gears(number_map, symbol_map)
+    assert sum(gears) == 79613331
 
 
-if __name__ == '__main__':
-    schematic = get_schematic('day03_real_input.txt')
-    symbol_map = get_symbol_map(schematic)
-    number_map = get_number_map(schematic)
-    parts = get_parts(number_map, symbol_map)
-    # assert sum(parts.values()) == 4361
-
-    updated_schematic = get_schematic('day03_real_input.txt')
-    # for number_loc, number in number_map.items():
-    #     for surrounding_loc in get_surrounding_locations(number_loc, number):
-    #         row, col = surrounding_loc
-    #         if 0 <= row < len(schematic) and 0 <= col < len(schematic[0]) and surrounding_loc not in symbol_map:
-    #             updated_schematic[row][col] = '#'
-
-    from colorama import init as colorama_init
-    from colorama import Fore
-    from colorama import Style
-    colorama_init()
-    for row, line in enumerate(updated_schematic):
-        this_row = ""
-        for col, character in enumerate(line):
-            if (row, col) in number_map:
-                if (row, col) in parts:
-                    this_row += f"{Fore.GREEN}{character}{Style.RESET_ALL}"
-                else:
-                    this_row += f"{Fore.YELLOW}{character}{Style.RESET_ALL}"
-            elif (row, col) in symbol_map:
-                this_row += f"{Fore.RED}{character}{Style.RESET_ALL}"
-            else:
-                this_row += character
-        print(''.join(this_row))
