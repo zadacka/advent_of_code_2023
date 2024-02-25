@@ -81,7 +81,7 @@ def test_part1_test_input():
     assert gears == [16345, 451490]
     assert sum(gears) == 467835
 
-def test_part1_real_input():
+def test_real_input():
     schematic = get_schematic('day03_real_input.txt')
     symbol_map = get_symbol_map(schematic)
     number_map = get_number_map(schematic)
