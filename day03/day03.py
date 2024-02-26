@@ -1,3 +1,16 @@
+# what have I learned from this 2h exercise:
+# 'off by one' errors suck - wasn't looping to the right number of columns, complete pain to find
+# should have covered this by a test case (number on the end of a row) but I had missed it
+# debugging with a comparison to a 'working' solution was good
+# some other people had really nice/elegant regex solutions to what I was doing in a noddy way with character counting
+# This is LOVELY:
+#         for match in re.finditer(r"\d+", line):
+#             start_index = match.start(0) - 1
+#             end_index = match.end(0)
+#             number = int(match.group(0))
+#             yield i, line, start_index, end_index, number
+
+
 def get_schematic(filename):
     schematic = []
     with open(filename) as f:
