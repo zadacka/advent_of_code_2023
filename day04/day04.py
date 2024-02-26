@@ -10,20 +10,35 @@ def parse_lines(filename):
 
 
 def count_winners(parsed_lines):
-    result = 0
+    matches = []
     for winning_numbers, drawn_numbers in parsed_lines:
-        winners = [1 for drawn_number in drawn_numbers if drawn_number in winning_numbers]
-        if winners:
-            result += 2 ** (sum(winners) - 1)
-    return result
+        matches.append(sum([1 for drawn_number in drawn_numbers if drawn_number in winning_numbers]))
+    return matches
+
+
+def part1_score_calculator(matches):
+    return sum([2 ** (m - 1) for m in matches if m != 0])
+
+
+def part2_score_calculator(matches):
+    spares = [0] * len(matches)
+    for index, match in enumerate(matches):
+        for spare_index in range(match):
+            index_to_update = index + spare_index + 1
+            if index_to_update <= len(matches):
+                spares[index + spare_index + 1] += 1 * (spares[index] + 1)
+    return sum(spares) + len(matches)
 
 
 def test_test_input():
     parsed_lines = parse_lines('day04_test_input.txt')
-    winners = count_winners(parsed_lines)
-    assert winners == 13
+    matches = count_winners(parsed_lines)
+    assert part1_score_calculator(matches) == 13
+    assert part2_score_calculator(matches) == 30
+
 
 def test_real_input():
     parsed_lines = parse_lines('day04_real_input.txt')
-    winners = count_winners(parsed_lines)
-    assert winners == 13
+    matches = count_winners(parsed_lines)
+    assert part1_score_calculator(matches) == 21105
+    assert part2_score_calculator(matches) == 0
