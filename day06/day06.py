@@ -36,13 +36,13 @@ def test_test_part1():
     for time, distance in zip(times, distances):
         ways_of_winning.append(find_ways_of_winning(time, distance))
 
-def test_real_part1():
+def test_real():
     times, distances = parse_input('day06_real_input.txt')
     ways_of_winning = [find_ways_of_winning(time, distance) for time, distance in zip(times, distances)]
     assert ways_of_winning == [23, 56, 56, 46]
     assert math.prod(ways_of_winning) == 3317888
 
-    # part 2
+    # part 2 ... slow
     time = int(''.join([str(i) for i in times]))
     distance = int(''.join([str(i) for i in distances]))
     assert find_ways_of_winning(time, distance) == 24655068
