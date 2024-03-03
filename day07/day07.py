@@ -33,50 +33,56 @@ class HandValue(IntEnum):
 def value_hand(hand, jokers=False):
     card_counts = Counter(hand)
 
-    joker_modifier = hand.count('J') if jokers else 0
+    number_of_jokers = card_counts['J']
+    if jokers and 0 < number_of_jokers < 5:
+        del card_counts['J']
+        card_counts[card_counts.most_common(1)[0][0]] += number_of_jokers
 
-    value_counts = Counter(card_counts.values())
+    value_counts = [count for _, count in card_counts.most_common()]
 
-    if 5 in value_counts:
+    if value_counts == [5]:
         # Five of a kind, where all five cards have the same label: AAAAA
         return HandValue.five_of_a_kind
-    elif 4 in value_counts:
+    elif value_counts == [4, 1]:
         # Four of a kind, where four cards have the same label and one card has a different label: AA8AA
-        if joker_modifier in (4, 1):
-            return HandValue.five_of_a_kind
         return HandValue.four_of_a_kind
-    elif 3 in value_counts and 2 in value_counts:
+    elif value_counts == [3, 2]:
         # Full house, where three cards have the same label, and the remaining two cards share a different label: 23332
-        if joker_modifier in (3, 2):
-            return HandValue.five_of_a_kind
-        if joker_modifier == 1:
-            return HandValue.four_of_a_kind
         return HandValue.full_house
-    elif 3 in value_counts:
+    elif value_counts == [3, 1, 1]:
         # Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
-        if joker_modifier in (3, 1):
-            return HandValue.four_of_a_kind
         return HandValue.three_of_a_kind
-    elif 2 in value_counts and 2 in value_counts.values():
+    elif value_counts == [2, 2, 1]:
         # Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
-        if joker_modifier == 2:
-            return HandValue.four_of_a_kind
-        if joker_modifier == 1:
-            return HandValue.full_house
         return HandValue.two_pairs
-    elif 2 in value_counts:
+    elif value_counts == [2, 1, 1, 1]:
         # One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
-        if joker_modifier == 2:
-            return HandValue.three_of_a_kind
-        if joker_modifier == 1:
-            return HandValue.three_of_a_kind
         return HandValue.one_pair
     else:
-        if joker_modifier == 1:
-            return HandValue.one_pair
         # High card, where all cards' labels are distinct: 23456
         return HandValue.high_card
 
+
+def value_hands(hands, jokers=False):
+    """For each hand, return a list:
+       [ hand value ] + [value for each of the five cards]
+       The list can then be compared to sort, including doing the tie-break """
+
+    value_map = card_to_value2 if jokers else card_to_value
+
+    hand_to_value = {}
+    for hand in hands:
+        hand_to_value[hand] = [value_hand(hand, jokers=jokers)] + [value_map[card] for card in hand]
+    return hand_to_value
+
+
+def calculate_winning_total(hand_to_bid, hand_to_value):
+    winning_order = sorted(hand_to_value.items(), key=operator.itemgetter(1))
+    winning_total = 0
+    print()
+    for rank, (hand, score) in enumerate(winning_order, start=1):
+        winning_total += hand_to_bid[hand] * rank
+    return winning_total
 
 def test_part1_test_input():
     hands, bids = parse_input('day07_test_input.txt')
@@ -84,64 +90,28 @@ def test_part1_test_input():
     assert bids == [765, 684, 28, 220, 483]
 
     hand_to_bid = {hand: bid for hand, bid in zip(hands, bids)}
-    hand_to_value = {}
-    for hand in hands:
-        # first the hand value, then the card values for a tie-break
-        hand_to_value[hand] = [value_hand(hand)] + [card_to_value[card] for card in hand]
-
-    winning_order = sorted(hand_to_value.items(), key=operator.itemgetter(1))
-    winning_total = 0
-    print()
-    for rank, (hand, score) in enumerate(winning_order, start=1):
-        bid = hand_to_bid[hand]
-        print(rank, hand, hand_to_bid[hand], score)
-        winning_total += hand_to_bid[hand] * rank
-    # 765 * 1 + 220 * 2 + 28 * 3 + 684 * 4 + 483 * 5
+    hand_to_value = value_hands(hands)
+    winning_total = calculate_winning_total(hand_to_bid, hand_to_value)
     assert winning_total == 6440
 
     # part 2
-    hand_to_value2 = {}
-    for hand in hands:
-        # first the hand value, then the card values for a tie-break
-        hand_to_value2[hand] = [value_hand(hand, jokers=True)] + [card_to_value2[card] for card in hand]
-    winning_order2 = sorted(hand_to_value2.items(), key=operator.itemgetter(1))
-    winning_total = 0
-    print()
-    for rank, (hand, score) in enumerate(winning_order2, start=1):
-        bid = hand_to_bid[hand]
-        print(rank, hand, hand_to_bid[hand], bid, score)
-        winning_total += hand_to_bid[hand] * rank
-    # 765 * 1 + 220 * 2 + 28 * 3 + 684 * 4 + 483 * 5
+    hand_to_value = value_hands(hands, jokers=True)
+    winning_total = calculate_winning_total(hand_to_bid, hand_to_value)
     assert winning_total == 5905
 
 
 def test_part1_real_input():
     hands, bids = parse_input('day07_real_input.txt')
     hand_to_bid = {hand: bid for hand, bid in zip(hands, bids)}
-    hand_to_value = {}
-    for hand in hands:
-        # first the hand value, then the card values for a tie-break
-        hand_to_value[hand] = [value_hand(hand)] + [card_to_value[card] for card in hand]
-
-    winning_order = sorted(hand_to_value.items(), key=operator.itemgetter(1))
-    winning_total = 0
-    for rank, (hand, score) in enumerate(winning_order, start=1):
-        winning_total += hand_to_bid[hand] * rank
-
+    hand_to_value = value_hands(hands)
+    winning_total = calculate_winning_total(hand_to_bid, hand_to_value)
     assert winning_total == 253313241
 
     # part 2
-    hand_to_value2 = {}
-    for hand in hands:
-        # first the hand value, then the card values for a tie-break
-        hand_to_value2[hand] = [value_hand(hand, jokers=True)] + [card_to_value2[card] for card in hand]
-    winning_order2 = sorted(hand_to_value2.items(), key=operator.itemgetter(1))
-    winning_total = 0
-    for rank, (hand, score) in enumerate(winning_order2, start=1):
-        bid = hand_to_bid[hand]
-        winning_total += hand_to_bid[hand] * rank
-
+    hand_to_value = value_hands(hands, jokers=True)
+    winning_total = calculate_winning_total(hand_to_bid, hand_to_value)
     assert winning_total == 253362743
+
 
 def test_value_hand():
     assert HandValue.five_of_a_kind == value_hand('KKKKK')
