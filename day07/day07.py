@@ -42,19 +42,19 @@ def value_hand(hand, jokers=False):
         return HandValue.five_of_a_kind
     elif 4 in value_counts:
         # Four of a kind, where four cards have the same label and one card has a different label: AA8AA
-        if joker_modifier == 1:
+        if joker_modifier in (4, 1):
             return HandValue.five_of_a_kind
         return HandValue.four_of_a_kind
     elif 3 in value_counts and 2 in value_counts:
         # Full house, where three cards have the same label, and the remaining two cards share a different label: 23332
-        if joker_modifier == 2:
+        if joker_modifier in (3, 2):
             return HandValue.five_of_a_kind
         if joker_modifier == 1:
             return HandValue.four_of_a_kind
         return HandValue.full_house
     elif 3 in value_counts:
         # Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
-        if joker_modifier == 1:
+        if joker_modifier in (3, 1):
             return HandValue.four_of_a_kind
         return HandValue.three_of_a_kind
     elif 2 in value_counts and 2 in value_counts.values():
@@ -62,14 +62,18 @@ def value_hand(hand, jokers=False):
         if joker_modifier == 2:
             return HandValue.four_of_a_kind
         if joker_modifier == 1:
-            return HandValue.three_of_a_kind
+            return HandValue.full_house
         return HandValue.two_pairs
     elif 2 in value_counts:
         # One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
+        if joker_modifier == 2:
+            return HandValue.three_of_a_kind
         if joker_modifier == 1:
             return HandValue.three_of_a_kind
         return HandValue.one_pair
     else:
+        if joker_modifier == 1:
+            return HandValue.one_pair
         # High card, where all cards' labels are distinct: 23456
         return HandValue.high_card
 
@@ -136,7 +140,8 @@ def test_part1_real_input():
     for rank, (hand, score) in enumerate(winning_order2, start=1):
         bid = hand_to_bid[hand]
         winning_total += hand_to_bid[hand] * rank
-    assert winning_total == 0
+
+    assert winning_total == 253362743
 
 def test_value_hand():
     assert HandValue.five_of_a_kind == value_hand('KKKKK')
