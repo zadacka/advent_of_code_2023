@@ -108,3 +108,23 @@ def walk_the_nodes(instructions, network, current_node="AAA"):
         instruction_index += 1
     return instruction_index
 
+def test_play_around():
+    instructions, network = parse_input('day08_real_input.txt')
+    nodes = [node for node in network.keys() if node.endswith('A')]
+    loops = [""] * len(nodes)
+
+    # so I'm curious ... all of the experienced AoC'ers online "spotted" the lead-in and cycles for ALL of the nodes
+    # being identical (REALLY 'special' puzzle input right there...) and seemed to say that inspecting the sample data
+    # would give it away ... so here's a little investigation into how I'd try to review the input data and initially
+    # try to look for patterns (spoiler: not obvious). The repetition is so slow for the 'real' example that the special
+    # nature of the instruction set did NOT jump out to me. Clearly I'm a rookie ... I hope that this stuff becomes more
+    # obvious or predictable with practice...
+    instruction_index = 0
+    for i in range(20000):
+        instruction = instructions[instruction_index % len(instructions)]
+        for node_index, current_node in enumerate(nodes):
+            left, right = network[current_node]
+            nodes[node_index] = left if instruction == 'L' else right
+            loops[node_index] += 'Z' if nodes[node_index].endswith('Z') else '.'
+        instruction_index += 1
+    assert loops == []
